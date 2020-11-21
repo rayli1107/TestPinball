@@ -613,10 +613,10 @@ PlayerSettings:
   facebookXfbml: 0
   facebookFrictionlessRequests: 1
   apiCompatibilityLevel: 6
-  cloudProjectId: 
+  cloudProjectId: 6edbe767-cebd-4366-8426-227e5013852c
   framebufferDepthMemorylessMode: 0
-  projectName: 
-  organizationId: 
+  projectName: TestPinball
+  organizationId: ray-li-dd7b92e3-2145-4040-9503-c4aaa843589c
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
   disableOldInputManagerSupport: 0
