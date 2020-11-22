@@ -55,9 +55,9 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void AddCredit()
+    public void AddCredit(int credit)
     {
-        ++_credit;
+        _credit += credit;
         UIManager.Instance.SetCreditText(_credit);
     }
 
@@ -86,6 +86,14 @@ public class GameController : MonoBehaviour
         else if (_state == GameState.kGameStart)
         {
             springController.AllowPlay();
+        }
+    }
+
+    public void StartVideoAd()
+    {
+        if (_state == GameState.kCreditCheck && _credit == 0)
+        {
+            AdsManager.Instance.DisplayVideoAd();
         }
     }
 

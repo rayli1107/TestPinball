@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public Text creditText;
+    public Button addCreditButton;
 
     public static UIManager Instance { get; private set; }
 
@@ -15,7 +16,7 @@ public class UIManager : MonoBehaviour
 
     public void OnButtonAddCredit()
     {
-        GameController.Instance.AddCredit();
+        GameController.Instance.StartVideoAd();
     }
 
     public void OnButtonPlay()
@@ -26,6 +27,7 @@ public class UIManager : MonoBehaviour
     public void SetCreditText(int credit)
     {
         creditText.text = string.Format("Credit: {0}", credit);
+        addCreditButton.gameObject.SetActive(credit == 0);
     }
 
     void Start()

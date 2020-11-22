@@ -1898,6 +1898,7 @@ GameObject:
   m_Component:
   - component: {fileID: 761838725}
   - component: {fileID: 761838724}
+  - component: {fileID: 761838726}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -1927,7 +1928,7 @@ MonoBehaviour:
   PCDragUnit: 10
   MobileDragUnit: 20
   lightEnableChance: 0.3
-  startingCredit: 5
+  startingCredit: 2
 --- !u!4 &761838725
 Transform:
   m_ObjectHideFlags: 0
@@ -1942,6 +1943,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &761838726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 761838723}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce3abede1458ec2439bc47043e3a1f4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _projectIdAppleAppStore: 3910494
+  _projectIdGooglePlayStore: 3910495
+  _placementId: rewardedVideo
+  testMode: 1
 --- !u!1001 &825644061
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3860,6 +3877,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   creditText: {fileID: 1662412232}
+  addCreditButton: {fileID: 631809980}
 --- !u!4 &1731420480 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6657715843381121206, guid: 4274eba7dd66c02458be9c6fcde752fb,
