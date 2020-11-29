@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Advertisements;
 
 public class AdsManager : MonoBehaviour, IUnityAdsListener
@@ -9,7 +10,9 @@ public class AdsManager : MonoBehaviour, IUnityAdsListener
     [SerializeField]
     private string _projectIdGooglePlayStore = "3910495";
     [SerializeField]
-    private string _placementId = "rewardedVideo";
+    private string _videoPlacementId = "rewardedVideo";
+    [SerializeField]
+    private string _bannerPlacementId = "TopBanner";
 #pragma warning restore 0649
 
 
@@ -25,6 +28,17 @@ public class AdsManager : MonoBehaviour, IUnityAdsListener
     {
         Advertisement.AddListener(this);
         Advertisement.Initialize(_projectIdGooglePlayStore, testMode);
+        StartCoroutine(TryShowBannerAdd());
+    }
+
+    IEnumerator TryShowBannerAdd()
+    {
+        while (!Advertisement.IsReady(_bannerPlacementId))
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+        Advertisement.Banner.SetPosition(BannerPosition.TOP_CENTER);
+        Advertisement.Banner.Show(_bannerPlacementId);
     }
 
     private void Update()
@@ -34,7 +48,7 @@ public class AdsManager : MonoBehaviour, IUnityAdsListener
     public void DisplayVideoAd()
     {
         Debug.Log("Displaying Video Ads");
-        Advertisement.Show(_placementId);
+        Advertisement.Show(_videoPlacementId);
     }
 
     public void OnUnityAdsReady(string placementId)
@@ -52,24 +66,21 @@ public class AdsManager : MonoBehaviour, IUnityAdsListener
 
     public void OnUnityAdsDidFinish(string placementId, ShowResult showResult)
     {
-        if (placementId != _placementId)
+        if (placementId == _videoPlacementId)
         {
-            Debug.Log("Incorrect placement Id");
-            return;
-        }
-
-        if (showResult == ShowResult.Finished)
-        {
-            Debug.Log("Ad Finished");
-            GameController.Instance.AddCredit(10);
-        }
-        else if (showResult == ShowResult.Skipped)
-        {
-            Debug.Log("Ad Skipped");
-        }
-        else
-        {
-            Debug.Log("Ad Failed");
+            if (showResult == ShowResult.Finished)
+            {
+                Debug.Log("Ad Finished");
+                GameController.Instance.AddCredit(10);
+            }
+            else if (showResult == ShowResult.Skipped)
+            {
+                Debug.Log("Ad Skipped");
+            }
+            else
+            {
+                Debug.Log("Ad Failed");
+            }
         }
     }
 }
