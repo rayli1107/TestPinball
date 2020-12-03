@@ -79,6 +79,7 @@ public class GameController : MonoBehaviour
 
     public void OnBallReturn()
     {
+        CameraController.Instance.ZoomOut();
         if (_state == GameState.kScoring)
         {
             _state = GameState.kCreditCheck;
@@ -108,6 +109,7 @@ public class GameController : MonoBehaviour
             ball.SetBouncy(true);
             ResetLights();
             springController.AllowPlay();
+            CameraController.Instance.ZoomIn();
         }
     }
 /*

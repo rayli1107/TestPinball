@@ -566,7 +566,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &142858921
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -605,7 +605,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 43018683ef315ad4d963938dc9a3a929, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 486e0fb50b4e25947b1e86dd0f910578, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1260,13 +1260,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 754bf452669e98649af702924a354254, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 378750942}
   minY: -5
+  zoomOut: 17
+  zoomIn: 5
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -4631,6 +4633,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ball
       objectReference: {fileID: 0}
+    - target: {fileID: 4335780271723467629, guid: bbaceaedf58aa754492f925a9e9d8d5b,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 353e15c55a6b7234e8ddccdd7a6975fd,
+        type: 3}
     - target: {fileID: 4335780271723467630, guid: bbaceaedf58aa754492f925a9e9d8d5b,
         type: 3}
       propertyPath: m_LocalPosition.x
