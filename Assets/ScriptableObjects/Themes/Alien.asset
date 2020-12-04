@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd2f295539d212747b97210b36a73a68, type: 3}
+  m_Name: Alien
+  m_EditorClassIdentifier: 
+  themeName: Alien
+  background: {fileID: 21300000, guid: b1377bc9b2c9f0e4baed1d415631dbcd, type: 3}
+  goal: {fileID: 21300000, guid: c3f920c26626b15458d7d88e145510ec, type: 3}
+  ball: {fileID: 21300000, guid: 991ce4a15e695fa4ebcea56462d34720, type: 3}

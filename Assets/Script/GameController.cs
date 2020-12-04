@@ -19,6 +19,8 @@ public class GameController : MonoBehaviour
     public float PCDragUnit = 10f;
     public float MobileDragUnit = 20f;
 
+    public SpriteRenderer background;
+
     public static GameController Instance { get; private set; }
 
     public float lightEnableChance = 0.3f;
@@ -34,6 +36,7 @@ public class GameController : MonoBehaviour
         _credit = startingCredit;
         _state = GameState.kCreditCheck;
         _first = true;
+        background.sprite = CurrentTheme.theme.background;
     }
 
     private void Awake()
