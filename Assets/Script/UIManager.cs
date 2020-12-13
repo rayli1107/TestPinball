@@ -1,10 +1,14 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    public Text creditText;
+    public TextMeshProUGUI creditText;
+    public Button playButton;
     public Button addCreditButton;
+    public Toggle autoZoomToggle;
+    public int credit;
 
     public static UIManager Instance { get; private set; }
 
@@ -23,17 +27,20 @@ public class UIManager : MonoBehaviour
         GameController.Instance.StartPlay();
     }
 
-    public void SetCreditText(int credit)
+    public void OnButtonQuit()
     {
-        creditText.text = string.Format("Credit: {0}", credit);
-        addCreditButton.gameObject.SetActive(credit == 0);
+        GameController.Instance.Quit();
     }
 
-    void Start()
+    public void OnAutoZoomChanged()
     {
+        GameController.Instance.autoZoomIn = autoZoomToggle.isOn;
     }
 
-    void LateUpdate()
+    public void SetCredit(int credit)
     {
+        creditText.text = string.Format("Credit:\n{0}", credit);
+        playButton.gameObject.SetActive(credit > 0);
+        addCreditButton.gameObject.SetActive(credit <= 0);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class GameController : MonoBehaviour
     public bool MobileDragInvertY = true;
     public float PCDragUnit = 10f;
     public float MobileDragUnit = 20f;
+    public bool autoZoomIn = true;
 
     public SpriteRenderer background;
 
@@ -36,7 +38,17 @@ public class GameController : MonoBehaviour
         _credit = startingCredit;
         _state = GameState.kCreditCheck;
         _first = true;
-        background.sprite = CurrentTheme.theme.background;
+
+        ThemeProfile theme = CurrentTheme.theme;
+        background.sprite = theme.background;
+        ball.GetComponent<SpriteRenderer>().sprite = theme.ball;
+
+        LightController[] lightControllers = lights.GetComponentsInChildren<LightController>();
+        foreach (LightController lightController in lightControllers)
+        {
+            lightController.spriteLightOn = theme.goal;
+        }
+
     }
 
     private void Awake()
@@ -61,7 +73,7 @@ public class GameController : MonoBehaviour
     public void AddCredit(int credit)
     {
         _credit += credit;
-        UIManager.Instance.SetCreditText(_credit);
+        UIManager.Instance.SetCredit(_credit);
     }
 
     public void RegisterHit(bool hit)
@@ -69,7 +81,6 @@ public class GameController : MonoBehaviour
         if (hit)
         {
             _credit += 2;
-            UIManager.Instance.SetCreditText(_credit);
             Debug.LogFormat("Hit, Credit: {0}", _credit);
         }
         else
@@ -86,6 +97,8 @@ public class GameController : MonoBehaviour
         if (_state == GameState.kScoring)
         {
             _state = GameState.kCreditCheck;
+            UIManager.Instance.SetCredit(_credit);
+            UIManager.Instance.gameObject.SetActive(true);
         }
         else if (_state == GameState.kGameStart)
         {
@@ -106,13 +119,15 @@ public class GameController : MonoBehaviour
         if (_state == GameState.kCreditCheck && _credit > 0)
         {
             --_credit;
-            Debug.LogFormat("Credit: {0}", _credit);
-            UIManager.Instance.SetCreditText(_credit);
+            UIManager.Instance.gameObject.SetActive(false);
             _state = GameState.kGameStart;
             ball.SetBouncy(true);
             ResetLights();
             springController.AllowPlay();
-            CameraController.Instance.ZoomIn();
+            if (autoZoomIn)
+            {
+                CameraController.Instance.ZoomIn();
+            }
         }
     }
 /*
@@ -149,7 +164,14 @@ public class GameController : MonoBehaviour
         if (_first)
         {
             _first = false;
-            UIManager.Instance.SetCreditText(_credit);
+            UIManager.Instance.autoZoomToggle.isOn = autoZoomIn;
+            UIManager.Instance.SetCredit(_credit);
+            UIManager.Instance.gameObject.SetActive(true);
         }
+    }
+
+    public void Quit()
+    {
+        SceneManager.LoadScene("MenuScene");
     }
 }
