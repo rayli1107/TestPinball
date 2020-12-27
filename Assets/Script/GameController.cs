@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using UI;
 
 public class GameController : MonoBehaviour
 {
@@ -19,7 +20,6 @@ public class GameController : MonoBehaviour
     public bool MobileDragInvertY = true;
     public float PCDragUnit = 10f;
     public float MobileDragUnit = 20f;
-    public bool autoZoomIn = true;
 
     public SpriteRenderer background;
 
@@ -48,7 +48,6 @@ public class GameController : MonoBehaviour
         {
             lightController.spriteLightOn = theme.goal;
         }
-
     }
 
     private void Awake()
@@ -73,7 +72,7 @@ public class GameController : MonoBehaviour
     public void AddCredit(int credit)
     {
         _credit += credit;
-        UIManager.Instance.SetCredit(_credit);
+        GameUIManager.Instance.SetCredit(_credit);
     }
 
     public void RegisterHit(bool hit)
@@ -97,8 +96,8 @@ public class GameController : MonoBehaviour
         if (_state == GameState.kScoring)
         {
             _state = GameState.kCreditCheck;
-            UIManager.Instance.SetCredit(_credit);
-            UIManager.Instance.gameObject.SetActive(true);
+            GameUIManager.Instance.SetCredit(_credit);
+            GameUIManager.Instance.gameObject.SetActive(true);
         }
         else if (_state == GameState.kGameStart)
         {
@@ -119,12 +118,12 @@ public class GameController : MonoBehaviour
         if (_state == GameState.kCreditCheck && _credit > 0)
         {
             --_credit;
-            UIManager.Instance.gameObject.SetActive(false);
+            GameUIManager.Instance.gameObject.SetActive(false);
             _state = GameState.kGameStart;
             ball.SetBouncy(true);
             ResetLights();
             springController.AllowPlay();
-            if (autoZoomIn)
+            if (GlobalConfig.autoZoom)
             {
                 CameraController.Instance.ZoomIn();
             }
@@ -164,9 +163,8 @@ public class GameController : MonoBehaviour
         if (_first)
         {
             _first = false;
-            UIManager.Instance.autoZoomToggle.isOn = autoZoomIn;
-            UIManager.Instance.SetCredit(_credit);
-            UIManager.Instance.gameObject.SetActive(true);
+            GameUIManager.Instance.SetCredit(_credit);
+            GameUIManager.Instance.gameObject.SetActive(true);
         }
     }
 

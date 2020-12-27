@@ -64,18 +64,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Script\AdsManager.cs" />
+    <Compile Include="Assets\Script\AudioConfig.cs" />
     <Compile Include="Assets\Script\BallController.cs" />
     <Compile Include="Assets\Script\CameraController.cs" />
     <Compile Include="Assets\Script\CirclePathController.cs" />
     <Compile Include="Assets\Script\GameController.cs" />
+    <Compile Include="Assets\Script\GlobalConfig.cs" />
     <Compile Include="Assets\Script\LightController.cs" />
-    <Compile Include="Assets\Script\MenuManager.cs" />
     <Compile Include="Assets\Script\ObjectRow.cs" />
     <Compile Include="Assets\Script\PinRow.cs" />
     <Compile Include="Assets\Script\SpringBoardController.cs" />
     <Compile Include="Assets\Script\SpringController.cs" />
     <Compile Include="Assets\Script\ThemeProfile.cs" />
-    <Compile Include="Assets\Script\UIManager.cs" />
+    <Compile Include="Assets\Script\UI\GameUIManager.cs" />
+    <Compile Include="Assets\Script\UI\MenuUIManager.cs" />
+    <Compile Include="Assets\Script\UI\OptionsPanel.cs" />
     <None Include="Assets\LICENSE.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
