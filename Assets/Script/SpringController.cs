@@ -82,7 +82,6 @@ public class SpringController : MonoBehaviour
 
     public void AssignBall()
     {
-//        Debug.LogFormat("Acquiring ball");
         ball.transform.SetParent(transform);
         ball.velocity = Vector2.zero;
         ball.angularVelocity = 0;
@@ -92,7 +91,6 @@ public class SpringController : MonoBehaviour
 
     public void UnassignBall()
     {
-//        Debug.LogFormat("Releasing ball");
         ball.transform.parent = null;
         ball.isKinematic = false;
     }
@@ -132,7 +130,6 @@ public class SpringController : MonoBehaviour
                 {
                     _state = SpringState.kPressing;
                     _firstMousePosition = Input.mousePosition;
-                    Debug.LogFormat("Start Drag {0}", _firstMousePosition);
                 }
                 break;
             case SpringState.kPressing:
@@ -150,13 +147,11 @@ public class SpringController : MonoBehaviour
                     float dragUnit = isMobile ? MobileDragUnit : PCDragUnit;
                     float y = my * diff.y / dragUnit;
                     y = Mathf.Clamp(y, maxDistance, 0);
-                    Debug.LogFormat("Dragging {0} {1}", diff, y);
                     springBoard.transform.localPosition = new Vector3(0, y, 0);
                     SetBallPosition();
                 }
                 else
                 {
-                    Debug.LogFormat("Released.");
                     UnassignBall();
                     springBoard.isKinematic = false;
                     _state = SpringState.kReleased;
@@ -181,7 +176,6 @@ public class SpringController : MonoBehaviour
                 AddTensionToBoard();
                 if (springBoard.velocity.y > 0)
                 {
-//                    Debug.Log("Rising");
                     _state = SpringState.kRising;
                 }
                 break;
@@ -189,14 +183,12 @@ public class SpringController : MonoBehaviour
                 AddTensionToBoard();
                 if (springBoard.velocity.y < 0)
                 {
-//                    Debug.Log("Falling");
                     _state = SpringState.kFalling;
                 }
                 break;
             case SpringState.kFalling:
                 if (springBoard.transform.localPosition.y <= 0)
                 {
-//                    Debug.LogFormat("Waiting for ball");
                     _state = SpringState.kWaitingForBall;
                     ResetSpringBoard();
                 }

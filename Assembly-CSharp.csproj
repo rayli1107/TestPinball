@@ -76,6 +76,7 @@
     <Compile Include="Assets\Script\SpringBoardController.cs" />
     <Compile Include="Assets\Script\SpringController.cs" />
     <Compile Include="Assets\Script\ThemeProfile.cs" />
+    <Compile Include="Assets\Script\UI\CreditMultiplierPanel.cs" />
     <Compile Include="Assets\Script\UI\GameUIManager.cs" />
     <Compile Include="Assets\Script\UI\MenuUIManager.cs" />
     <Compile Include="Assets\Script\UI\OptionsPanel.cs" />

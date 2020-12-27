@@ -14,6 +14,8 @@ namespace UI
         private Button _addCreditButton;
         [SerializeField]
         private OptionsPanel _optionsPanel;
+        [SerializeField]
+        private CreditMultiplierPanel _multiplierPanel;
 #pragma warning restore 0649
         //    public int credit;
 
@@ -49,6 +51,11 @@ namespace UI
         public void OnOptionsButton()
         {
             _optionsPanel.gameObject.SetActive(true);
+        }
+
+        public void ShowCreditMultiplierPanel()
+        {
+            _multiplierPanel.gameObject.SetActive(true);
         }
     }
 }

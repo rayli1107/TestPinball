@@ -1,15 +1,23 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UI;
+using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
 {
     public enum GameState
     {
         kCreditCheck,
+        kSelectMultiplier,
         kGameStart,
         kScoring
     }
+
+#pragma warning disable 0649
+    [SerializeField]
+    private Vector2Int[] _creditMultiplierList;
+#pragma warning restore 0649
+    public Vector2Int[] creditMultiplierList => _creditMultiplierList;
 
     public GameObject lightPrefab;
     public BallController ball;
@@ -27,6 +35,7 @@ public class GameController : MonoBehaviour
 
     public float lightEnableChance = 0.3f;
 
+    private int _multiplier;
     public int startingCredit = 10;
     private int _credit;
     private GameState _state;
@@ -60,13 +69,33 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private void ResetLights()
+    private void ResetLights(int count)
     {
         LightController[] lightControllers = lights.GetComponentsInChildren<LightController>();
+        HashSet<int> indices = new HashSet<int>();
+        for (int i = 0; i < count; ++i)
+        {
+            while (true)
+            {
+                int index = _random.Next(lightControllers.Length);
+                if (indices.Add(index))
+                {
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < lightControllers.Length; ++i)
+        {
+            lightControllers[i].SetState(indices.Contains(i));
+        }
+
+        /*
         foreach (LightController lightController in lightControllers)
         {
             lightController.SetState(_random.NextDouble() < lightEnableChance);
         }
+        */
     }
 
     public void AddCredit(int credit)
@@ -79,7 +108,7 @@ public class GameController : MonoBehaviour
     {
         if (hit)
         {
-            _credit += 2;
+            _credit += _multiplier;
             Debug.LogFormat("Hit, Credit: {0}", _credit);
         }
         else
@@ -113,20 +142,28 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public void SelectCreditMultiplier(Vector2Int setting)
+    {
+        _multiplier = setting.y;
+
+        GameUIManager.Instance.gameObject.SetActive(false);
+        _state = GameState.kGameStart;
+        ball.SetBouncy(true);
+        ResetLights(setting.x);
+        springController.AllowPlay();
+        if (GlobalConfig.autoZoom)
+        {
+            CameraController.Instance.ZoomIn();
+        }
+    }
+
     public void StartPlay()
     {
         if (_state == GameState.kCreditCheck && _credit > 0)
         {
             --_credit;
-            GameUIManager.Instance.gameObject.SetActive(false);
-            _state = GameState.kGameStart;
-            ball.SetBouncy(true);
-            ResetLights();
-            springController.AllowPlay();
-            if (GlobalConfig.autoZoom)
-            {
-                CameraController.Instance.ZoomIn();
-            }
+            _state = GameState.kSelectMultiplier;
+            GameUIManager.Instance.ShowCreditMultiplierPanel();
         }
     }
 /*
