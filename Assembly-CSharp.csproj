@@ -80,6 +80,7 @@
     <Compile Include="Assets\Script\UI\GameUIManager.cs" />
     <Compile Include="Assets\Script\UI\MenuUIManager.cs" />
     <Compile Include="Assets\Script\UI\OptionsPanel.cs" />
+    <Compile Include="Assets\Script\UI\ToggleControl.cs" />
     <None Include="Assets\LICENSE.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />

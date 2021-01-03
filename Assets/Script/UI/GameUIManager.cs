@@ -16,6 +16,8 @@ namespace UI
         private OptionsPanel _optionsPanel;
         [SerializeField]
         private CreditMultiplierPanel _multiplierPanel;
+        [SerializeField]
+        private TextMeshProUGUI _textMultiplier;
 #pragma warning restore 0649
         //    public int credit;
 
@@ -56,6 +58,20 @@ namespace UI
         public void ShowCreditMultiplierPanel()
         {
             _multiplierPanel.gameObject.SetActive(true);
+        }
+
+        public void EnableButtons(bool enable)
+        {
+            foreach (Button button in GetComponentsInChildren<Button>(true))
+            {
+                button.enabled = enable;
+            }
+        }
+
+        public void SetMultiplierText(int multiplier)
+        {
+            _textMultiplier.gameObject.SetActive(multiplier > 0);
+            _textMultiplier.text = string.Format("{0}x\nMultiplier", multiplier);
         }
     }
 }

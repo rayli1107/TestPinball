@@ -41,6 +41,7 @@ public class CameraController : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        _camera = GetComponent<Camera>();
     }
 
     private void calculateGameAreaRect()
@@ -69,7 +70,6 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         _eventSystem = EventSystem.current;
-        _camera = GetComponent<Camera>();
 
         float x = Screen.safeArea.x / Screen.width;
         float width = Screen.safeArea.width / Screen.width;
@@ -126,5 +126,10 @@ public class CameraController : MonoBehaviour
     public void ZoomOut()
     {
         _zoomSpeedMultiple = 1;
+    }
+
+    public void SetBackgroundColor(Color color)
+    {
+        _camera.backgroundColor = color;
     }
 }

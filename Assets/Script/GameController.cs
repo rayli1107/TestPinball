@@ -2,6 +2,7 @@
 using UnityEngine.SceneManagement;
 using UI;
 using System.Collections.Generic;
+using System.Collections;
 
 public class GameController : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class GameController : MonoBehaviour
 #pragma warning disable 0649
     [SerializeField]
     private Vector2Int[] _creditMultiplierList;
+    [SerializeField]
+    private GameObject _walls;
 #pragma warning restore 0649
     public Vector2Int[] creditMultiplierList => _creditMultiplierList;
 
@@ -56,6 +59,12 @@ public class GameController : MonoBehaviour
         foreach (LightController lightController in lightControllers)
         {
             lightController.spriteLightOn = theme.goal;
+        }
+
+        CameraController.Instance.SetBackgroundColor(theme.backgroundColor);
+        foreach (SpriteRenderer sprite in _walls.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            sprite.color = theme.wallColor;
         }
     }
 
@@ -121,10 +130,10 @@ public class GameController : MonoBehaviour
 
     public void OnBallReturn()
     {
-        CameraController.Instance.ZoomOut();
         if (_state == GameState.kScoring)
         {
             _state = GameState.kCreditCheck;
+            CameraController.Instance.ZoomOut();
             GameUIManager.Instance.SetCredit(_credit);
             GameUIManager.Instance.gameObject.SetActive(true);
         }
@@ -142,11 +151,22 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public void StartPlay()
+    {
+        if (_state == GameState.kCreditCheck && _credit > 0)
+        {
+            --_credit;
+            _state = GameState.kSelectMultiplier;
+            StartCoroutine(AnimateLights());
+//            GameUIManager.Instance.ShowCreditMultiplierPanel();
+        }
+    }
+
     public void SelectCreditMultiplier(Vector2Int setting)
     {
-        _multiplier = setting.y;
-
+        GameUIManager.Instance.EnableButtons(true);
         GameUIManager.Instance.gameObject.SetActive(false);
+        _multiplier = setting.y;
         _state = GameState.kGameStart;
         ball.SetBouncy(true);
         ResetLights(setting.x);
@@ -157,14 +177,25 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void StartPlay()
+    private IEnumerator AnimateLights()
     {
-        if (_state == GameState.kCreditCheck && _credit > 0)
+        GameUIManager.Instance.EnableButtons(false);
+        LightController[] lightControllers = lights.GetComponentsInChildren<LightController>();
+        for (int i = 0; i < 3 * lightControllers.Length; ++i)
         {
-            --_credit;
-            _state = GameState.kSelectMultiplier;
-            GameUIManager.Instance.ShowCreditMultiplierPanel();
+            int prev = i % lightControllers.Length;
+            int cur = (i + 1) % lightControllers.Length;
+            lightControllers[prev].SetState(false);
+            lightControllers[cur].SetState(true);
+            yield return new WaitForSeconds(0.5f / lightControllers.Length);
         }
+
+        int index = _random.Next(_creditMultiplierList.Length);
+        Vector2Int setting = _creditMultiplierList[index];
+        GameUIManager.Instance.SetMultiplierText(setting.y);
+        yield return new WaitForSeconds(1);
+        GameUIManager.Instance.SetMultiplierText(0);
+        SelectCreditMultiplier(setting);
     }
 /*
     private void ProcessDrag()

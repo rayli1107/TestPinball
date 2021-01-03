@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Alien
   m_EditorClassIdentifier: 
   themeName: Alien
-  background: {fileID: 21300000, guid: b1377bc9b2c9f0e4baed1d415631dbcd, type: 3}
+  background: {fileID: 21300000, guid: 2810978b8e693a44c93e3e6e27839f59, type: 3}
   goal: {fileID: 21300000, guid: c3f920c26626b15458d7d88e145510ec, type: 3}
   ball: {fileID: 21300000, guid: 991ce4a15e695fa4ebcea56462d34720, type: 3}
+  backgroundColor: {r: 0.16862746, g: 0.21960784, b: 0.39215687, a: 1}
+  wallColor: {r: 0, g: 0.85579157, b: 1, a: 1}

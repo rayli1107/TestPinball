@@ -7,4 +7,6 @@ public class ThemeProfile : ScriptableObject
     public Sprite background;
     public Sprite goal;
     public Sprite ball;
+    public Color backgroundColor;
+    public Color wallColor;
 }
