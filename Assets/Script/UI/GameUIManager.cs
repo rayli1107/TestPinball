@@ -1,4 +1,6 @@
-﻿using TMPro;
+﻿using System;
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 namespace UI
@@ -6,6 +8,8 @@ namespace UI
     public class GameUIManager : MonoBehaviour
     {
 #pragma warning disable 0649
+        [SerializeField]
+        private RectTransform _gameUIPanel;
         [SerializeField]
         private TextMeshProUGUI _creditText;
         [SerializeField]
@@ -18,6 +22,12 @@ namespace UI
         private CreditMultiplierPanel _multiplierPanel;
         [SerializeField]
         private TextMeshProUGUI _textMultiplier;
+        [SerializeField]
+        private Image _imageHitAnimation;
+        [SerializeField]
+        private float _hitAnimationDuration = 2f;
+        [SerializeField]
+        private Sprite _spriteKey;
 #pragma warning restore 0649
         //    public int credit;
 
@@ -72,6 +82,41 @@ namespace UI
         {
             _textMultiplier.gameObject.SetActive(multiplier > 0);
             _textMultiplier.text = string.Format("{0}x\nMultiplier", multiplier);
+        }
+
+        public void EnableGameUIPanel(bool enable)
+        {
+            _gameUIPanel.gameObject.SetActive(enable);
+        }
+
+        public void ShowHitAnimation(bool goal, Action callback)
+        {
+            _imageHitAnimation.sprite = goal ? CurrentTheme.theme.goal : _spriteKey;
+            _imageHitAnimation.rectTransform.localScale = Vector3.one;
+            _imageHitAnimation.color = new Color(1f, 1f, 1f, 1f);
+            _imageHitAnimation.gameObject.SetActive(true);
+            StartCoroutine(HitAnimation(callback));
+        }
+
+        private IEnumerator HitAnimation(Action callback)
+        {
+            float timeStart = Time.time;
+            while (true)
+            {
+                float duration = (Time.time - timeStart) / _hitAnimationDuration;
+                if (duration >= 1f)
+                {
+                    break;
+                }
+
+                _imageHitAnimation.color = new Color(1f, 1f, 1f, 1 - duration);
+                _imageHitAnimation.rectTransform.localScale = new Vector3(
+                    1 + duration, 1 + duration, 1);
+
+                yield return null;
+            }
+            callback?.Invoke();
+            _imageHitAnimation.gameObject.SetActive(false);
         }
     }
 }

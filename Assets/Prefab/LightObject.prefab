@@ -110,5 +110,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ce9ec786fcf0ac4a8574c280d4fe892, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteLightOn: {fileID: 21300000, guid: 0c9b183e22f36dd40a802e79def13987, type: 3}
-  spriteLightOff: {fileID: 21300000, guid: 54956305d1d24e345b8656f0df999cde, type: 3}
+  _spriteLightNone: {fileID: 21300000, guid: 54956305d1d24e345b8656f0df999cde, type: 3}
+  _spriteLightKey: {fileID: 21300000, guid: dca699e6e2f99704586b05d1b9cd3dbb, type: 3}

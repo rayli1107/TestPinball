@@ -34,6 +34,8 @@ public class GameController : MonoBehaviour
 
     public SpriteRenderer background;
 
+    private Vector3 _initialBallPosition;
+
     public static GameController Instance { get; private set; }
 
     public float lightEnableChance = 0.3f;
@@ -55,12 +57,6 @@ public class GameController : MonoBehaviour
         background.sprite = theme.background;
         ball.GetComponent<SpriteRenderer>().sprite = theme.ball;
 
-        LightController[] lightControllers = lights.GetComponentsInChildren<LightController>();
-        foreach (LightController lightController in lightControllers)
-        {
-            lightController.spriteLightOn = theme.goal;
-        }
-
         CameraController.Instance.SetBackgroundColor(theme.backgroundColor);
         foreach (SpriteRenderer sprite in _walls.GetComponentsInChildren<SpriteRenderer>(true))
         {
@@ -76,6 +72,8 @@ public class GameController : MonoBehaviour
             Instance = this;
             Screen.orientation = ScreenOrientation.Portrait;
         }
+
+        _initialBallPosition = ball.transform.position;
     }
 
     private void ResetLights(int count)
@@ -94,17 +92,27 @@ public class GameController : MonoBehaviour
             }
         }
 
+        int keyIndex;
+        do
+        {
+            keyIndex = _random.Next(lightControllers.Length);
+        } while (indices.Contains(keyIndex));
+
         for (int i = 0; i < lightControllers.Length; ++i)
         {
-            lightControllers[i].SetState(indices.Contains(i));
+            if (indices.Contains(i))
+            {
+                lightControllers[i].SetState(LightType.GOAL);
+            }
+            else if (i == keyIndex)
+            {
+                lightControllers[i].SetState(LightType.KEY);
+            }
+            else
+            {
+                lightControllers[i].SetState(LightType.NONE);
+            }
         }
-
-        /*
-        foreach (LightController lightController in lightControllers)
-        {
-            lightController.SetState(_random.NextDouble() < lightEnableChance);
-        }
-        */
     }
 
     public void AddCredit(int credit)
@@ -113,16 +121,35 @@ public class GameController : MonoBehaviour
         GameUIManager.Instance.SetCredit(_credit);
     }
 
-    public void RegisterHit(bool hit)
+    private void OnHitAnimationFinish()
     {
-        if (hit)
+        ball.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        ball.transform.position = _initialBallPosition + 2 * Vector3.up;
+        ball.gameObject.SetActive(true);
+    }
+
+    public void RegisterHit(LightType lightType)
+    {
+        switch (lightType)
         {
-            _credit += _multiplier;
-            Debug.LogFormat("Hit, Credit: {0}", _credit);
-        }
-        else
-        {
-            Debug.LogFormat("Miss, Credit: {0}", _credit);
+            case LightType.GOAL:
+                _credit += _multiplier;
+                Debug.LogFormat("Hit, Credit: {0}", _credit);
+
+                ball.gameObject.SetActive(false);
+                GameUIManager.Instance.ShowHitAnimation(
+                    true, OnHitAnimationFinish);
+                break;
+            case LightType.KEY:
+                Debug.LogFormat("Key", _credit);
+
+                ball.gameObject.SetActive(false);
+                GameUIManager.Instance.ShowHitAnimation(
+                    false, OnHitAnimationFinish);
+                break;
+            default:
+                Debug.LogFormat("Miss, Credit: {0}", _credit);
+                break;
         }
         _state = GameState.kScoring;
         ball.SetBouncy(false);
@@ -135,7 +162,7 @@ public class GameController : MonoBehaviour
             _state = GameState.kCreditCheck;
             CameraController.Instance.ZoomOut();
             GameUIManager.Instance.SetCredit(_credit);
-            GameUIManager.Instance.gameObject.SetActive(true);
+            GameUIManager.Instance.EnableGameUIPanel(true);
         }
         else if (_state == GameState.kGameStart)
         {
@@ -164,8 +191,7 @@ public class GameController : MonoBehaviour
 
     public void SelectCreditMultiplier(Vector2Int setting)
     {
-        GameUIManager.Instance.EnableButtons(true);
-        GameUIManager.Instance.gameObject.SetActive(false);
+        GameUIManager.Instance.EnableGameUIPanel(false);
         _multiplier = setting.y;
         _state = GameState.kGameStart;
         ball.SetBouncy(true);
@@ -179,15 +205,19 @@ public class GameController : MonoBehaviour
 
     private IEnumerator AnimateLights()
     {
-        GameUIManager.Instance.EnableButtons(false);
         LightController[] lightControllers = lights.GetComponentsInChildren<LightController>();
+        for (int i = 0; i < lightControllers.Length; ++i)
+        {
+            lightControllers[i].SetState(LightType.NONE);
+        }
+
         for (int i = 0; i < 3 * lightControllers.Length; ++i)
         {
             int prev = i % lightControllers.Length;
             int cur = (i + 1) % lightControllers.Length;
-            lightControllers[prev].SetState(false);
-            lightControllers[cur].SetState(true);
-            yield return new WaitForSeconds(0.5f / lightControllers.Length);
+            lightControllers[prev].SetState(LightType.NONE);
+            lightControllers[cur].SetState(LightType.GOAL);
+            yield return new WaitForSeconds(0.3f / lightControllers.Length);
         }
 
         int index = _random.Next(_creditMultiplierList.Length);
@@ -232,7 +262,7 @@ public class GameController : MonoBehaviour
         {
             _first = false;
             GameUIManager.Instance.SetCredit(_credit);
-            GameUIManager.Instance.gameObject.SetActive(true);
+            GameUIManager.Instance.EnableGameUIPanel(true);
         }
     }
 
