@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CirclePathController : MonoBehaviour
 {
+    public bool enableSprite = false;
     public Rigidbody2D ball;
     public GameObject prefabWall;
     public int sides = 16;
@@ -32,7 +33,7 @@ public class CirclePathController : MonoBehaviour
                 Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0);
             wall.transform.localScale = localScale;
             wall.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Rad2Deg * angle);
-            wall.GetComponent<SpriteRenderer>().enabled = false;
+            wall.GetComponent<SpriteRenderer>().enabled = enableSprite;
         }
     }
 
