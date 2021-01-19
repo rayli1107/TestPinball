@@ -6852,6 +6852,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ball
       objectReference: {fileID: 0}
+    - target: {fileID: 4335780271723467628, guid: bbaceaedf58aa754492f925a9e9d8d5b,
+        type: 3}
+      propertyPath: m_Mass
+      value: 1.1
+      objectReference: {fileID: 0}
     - target: {fileID: 4335780271723467629, guid: bbaceaedf58aa754492f925a9e9d8d5b,
         type: 3}
       propertyPath: m_Sprite
