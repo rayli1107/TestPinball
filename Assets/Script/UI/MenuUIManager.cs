@@ -1,30 +1,27 @@
-﻿using TMPro;
+﻿using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
-public static class CurrentTheme
-{
-    public static ThemeProfile theme;
-}
 
 namespace UI {
     public class MenuUIManager : MonoBehaviour
     {
 #pragma warning disable 0649
         [SerializeField]
-        private ThemeProfile[] _themes;
-        [SerializeField]
-        private GameObject _prefabThemePanel;
+        private ThemePanel _prefabThemePanel;
         [SerializeField]
         private HorizontalLayoutGroup _panelThemeList;
         [SerializeField]
         private float _speedMultiple = 4f;
         [SerializeField]
         private OptionsPanel _optionsPanel;
+        [SerializeField]
+        private TextMeshProUGUI _textCredits;
+        [SerializeField]
+        private TextMeshProUGUI _textKeys;
 #pragma warning restore 0649
 
-        private int _current;
         private float _speedX;
 
         private float deltaX
@@ -44,40 +41,51 @@ namespace UI {
             return -1 * ret;
         }
 
-        private void SelectTheme()
+        private IEnumerator DelayedEnable()
         {
-            ThemeProfile theme = _themes[_current];
-            CurrentTheme.theme = theme;
+            while (!GlobalGameContext.initialized)
+            {
+                yield return null;
+            }
+            for (int i = 0; i < GlobalGameContext.themes.Count; ++i)
+            {
+                ThemePanel themePanel = Instantiate(
+                    _prefabThemePanel, _panelThemeList.transform);
+                themePanel.themeIndex = i;
+                themePanel.gameObject.SetActive(true);
+            }
         }
 
         private void OnEnable()
         {
-            _current = 0;
             _speedX = 0f;
-            foreach (ThemeProfile profile in _themes)
-            {
-                GameObject panel = Instantiate(
-                    _prefabThemePanel, _panelThemeList.transform);
-                panel.GetComponentInChildren<TextMeshProUGUI>().text = profile.themeName;
-                panel.GetComponentInChildren<Image>().sprite = profile.background;
-                panel.SetActive(true);
-            }
+            StartCoroutine(DelayedEnable());
+            GlobalGameContext.statUpdateAction += RefreshStats;
+            RefreshStats();
+        }
 
-            SelectTheme();
+        private void OnDisable()
+        {
+            GlobalGameContext.statUpdateAction -= RefreshStats;
+        }
+
+        private void RefreshStats()
+        {
+            _textCredits.text = GlobalGameContext.credits.ToString();
+            _textKeys.text = GlobalGameContext.keys.ToString();
         }
 
         public void OnNextButton()
         {
-            _current = (_current + 1) % _themes.Length;
-            _speedX = deltaX * (_current == 0 ? 1 : -1);
-            SelectTheme();
+            GlobalGameContext.themeIndex++;
+            _speedX = deltaX * (GlobalGameContext.themeIndex == 0 ? 1 : -1);
         }
 
         public void OnPrevButton()
         {
-            _current = (_current + _themes.Length - 1) % _themes.Length;
-            _speedX = deltaX * ((_current == _themes.Length - 1) ? -1 : 1);
-            SelectTheme();
+            GlobalGameContext.themeIndex--;
+            int count = GlobalGameContext.themes.Count;
+            _speedX = deltaX * ((GlobalGameContext.themeIndex == count - 1) ? -1 : 1);
         }
 
         public void OnPlayButton()
@@ -89,7 +97,7 @@ namespace UI {
         {
             RectTransform rect = _panelThemeList.GetComponent<RectTransform>();
             float x = rect.anchoredPosition.x;
-            float targetX = getX(_current);
+            float targetX = getX(GlobalGameContext.themeIndex);
             if (x != targetX)
             {
                 float speed = _speedMultiple * _speedX * Time.deltaTime;

@@ -30,7 +30,7 @@ public class LightController : MonoBehaviour
                 spriteRenderer.sprite = _spriteLightNone;
                 break;
             case LightType.GOAL:
-                spriteRenderer.sprite = CurrentTheme.theme.goal;
+                spriteRenderer.sprite = GlobalGameContext.currentTheme.goal;
                 break;
             case LightType.KEY:
                 spriteRenderer.sprite = _spriteLightKey;

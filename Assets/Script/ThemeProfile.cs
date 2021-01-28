@@ -9,4 +9,5 @@ public class ThemeProfile : ScriptableObject
     public Sprite ball;
     public Color backgroundColor;
     public Color wallColor;
+    public int keysToUnlock;
 }

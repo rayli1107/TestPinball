@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using UI;
 using UnityEngine;
 using UnityEngine.Advertisements;
 
@@ -71,7 +72,7 @@ public class AdsManager : MonoBehaviour, IUnityAdsListener
             if (showResult == ShowResult.Finished)
             {
                 Debug.Log("Ad Finished");
-                GameController.Instance.AddCredit(10);
+                GlobalGameContext.ReloadCredits();
             }
             else if (showResult == ShowResult.Skipped)
             {

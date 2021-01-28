@@ -13,6 +13,8 @@ namespace UI
         [SerializeField]
         private TextMeshProUGUI _creditText;
         [SerializeField]
+        private TextMeshProUGUI _keysText;
+        [SerializeField]
         private Button _playButton;
         [SerializeField]
         private Button _addCreditButton;
@@ -38,6 +40,17 @@ namespace UI
             Instance = this;
         }
 
+        private void OnEnable()
+        {
+            GlobalGameContext.statUpdateAction += RefreshStats;
+            RefreshStats();
+        }
+
+        private void OnDisable()
+        {
+            GlobalGameContext.statUpdateAction -= RefreshStats;
+        }
+
         public void OnButtonAddCredit()
         {
             GameController.Instance.StartVideoAd();
@@ -53,11 +66,12 @@ namespace UI
             GameController.Instance.Quit();
         }
 
-        public void SetCredit(int credit)
+        private void RefreshStats()
         {
-            _creditText.text = string.Format("Credit:\n{0}", credit);
-            _playButton.gameObject.SetActive(credit > 0);
-            _addCreditButton.gameObject.SetActive(credit <= 0);
+            _creditText.text = GlobalGameContext.credits.ToString();
+            _playButton.gameObject.SetActive(GlobalGameContext.credits > 0);
+            _addCreditButton.gameObject.SetActive(GlobalGameContext.credits <= 0);
+            _keysText.text = GlobalGameContext.keys.ToString();
         }
 
         public void OnOptionsButton()
@@ -91,7 +105,8 @@ namespace UI
 
         public void ShowHitAnimation(bool goal, Action callback)
         {
-            _imageHitAnimation.sprite = goal ? CurrentTheme.theme.goal : _spriteKey;
+            ThemeProfile theme = GlobalGameContext.currentTheme;
+            _imageHitAnimation.sprite = goal ? theme.goal : _spriteKey;
             _imageHitAnimation.rectTransform.localScale = Vector3.one;
             _imageHitAnimation.color = new Color(1f, 1f, 1f, 1f);
             _imageHitAnimation.gameObject.SetActive(true);

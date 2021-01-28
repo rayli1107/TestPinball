@@ -41,19 +41,22 @@ public class GameController : MonoBehaviour
     public float lightEnableChance = 0.3f;
 
     private int _multiplier;
-    public int startingCredit = 10;
-    private int _credit;
     private GameState _state;
     private System.Random _random;
     private bool _first;
 
     public void OnEnable()
     {
-        _credit = startingCredit;
+        if (!GlobalGameContext.initialized)
+        {
+            Quit();
+            return;
+        }
+
         _state = GameState.kCreditCheck;
         _first = true;
 
-        ThemeProfile theme = CurrentTheme.theme;
+        ThemeProfile theme = GlobalGameContext.currentTheme;
         background.sprite = theme.background;
         ball.GetComponent<SpriteRenderer>().sprite = theme.ball;
 
@@ -114,12 +117,13 @@ public class GameController : MonoBehaviour
             }
         }
     }
-
+/*
     public void AddCredit(int credit)
     {
-        _credit += credit;
-        GameUIManager.Instance.SetCredit(_credit);
+        GlobalGameContext.credits += credit;
+        GameUIManager.Instance.RefreshStats();
     }
+    */
 
     private void OnHitAnimationFinish()
     {
@@ -133,22 +137,23 @@ public class GameController : MonoBehaviour
         switch (lightType)
         {
             case LightType.GOAL:
-                _credit += _multiplier;
-                Debug.LogFormat("Hit, Credit: {0}", _credit);
+                GlobalGameContext.credits += _multiplier;
+                Debug.LogFormat("Hit, Credit: {0}", GlobalGameContext.credits);
 
                 ball.gameObject.SetActive(false);
                 GameUIManager.Instance.ShowHitAnimation(
                     true, OnHitAnimationFinish);
                 break;
             case LightType.KEY:
-                Debug.LogFormat("Key", _credit);
+                GlobalGameContext.keys++;
+                Debug.LogFormat("Hit, Key: {0}", GlobalGameContext.keys);
 
                 ball.gameObject.SetActive(false);
                 GameUIManager.Instance.ShowHitAnimation(
                     false, OnHitAnimationFinish);
                 break;
             default:
-                Debug.LogFormat("Miss, Credit: {0}", _credit);
+                Debug.LogFormat("Miss, Credit: {0}", GlobalGameContext.credits);
                 break;
         }
         _state = GameState.kScoring;
@@ -161,7 +166,6 @@ public class GameController : MonoBehaviour
         {
             _state = GameState.kCreditCheck;
             CameraController.Instance.ZoomOut();
-            GameUIManager.Instance.SetCredit(_credit);
             GameUIManager.Instance.EnableGameUIPanel(true);
         }
         else if (_state == GameState.kGameStart)
@@ -172,7 +176,7 @@ public class GameController : MonoBehaviour
 
     public void StartVideoAd()
     {
-        if (_state == GameState.kCreditCheck && _credit == 0)
+        if (_state == GameState.kCreditCheck && GlobalGameContext.credits == 0)
         {
             AdsManager.Instance.DisplayVideoAd();
         }
@@ -180,9 +184,9 @@ public class GameController : MonoBehaviour
 
     public void StartPlay()
     {
-        if (_state == GameState.kCreditCheck && _credit > 0)
+        if (_state == GameState.kCreditCheck && GlobalGameContext.credits > 0)
         {
-            --_credit;
+            --GlobalGameContext.credits;
             _state = GameState.kSelectMultiplier;
             StartCoroutine(AnimateLights());
 //            GameUIManager.Instance.ShowCreditMultiplierPanel();
@@ -261,7 +265,6 @@ public class GameController : MonoBehaviour
         if (_first)
         {
             _first = false;
-            GameUIManager.Instance.SetCredit(_credit);
             GameUIManager.Instance.EnableGameUIPanel(true);
         }
     }
