@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -94,8 +95,15 @@ namespace UI
 
         public void SetMultiplierText(int multiplier)
         {
+            List<string> text = new List<string>()
+            {
+                string.Format("{0}x", multiplier),
+                "Multiplier",
+                "Click to Continue"
+            };
+
             _textMultiplier.gameObject.SetActive(multiplier > 0);
-            _textMultiplier.text = string.Format("{0}x\nMultiplier", multiplier);
+            _textMultiplier.text = string.Join("\n", text);
         }
 
         public void EnableGameUIPanel(bool enable)

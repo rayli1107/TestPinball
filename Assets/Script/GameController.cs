@@ -44,6 +44,7 @@ public class GameController : MonoBehaviour
     private GameState _state;
     private System.Random _random;
     private bool _first;
+    private bool _onCreditMultiplierSelect;
 
     public void OnEnable()
     {
@@ -199,7 +200,7 @@ public class GameController : MonoBehaviour
         _multiplier = setting.y;
         _state = GameState.kGameStart;
         ball.SetBouncy(true);
-        ResetLights(setting.x);
+//        ResetLights(setting.x);
         springController.AllowPlay();
         if (GlobalConfig.autoZoom)
         {
@@ -207,8 +208,28 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public void SelectCreditMultiplier()
+    {
+        _onCreditMultiplierSelect = true;
+    }
+
     private IEnumerator AnimateLights()
     {
+        _onCreditMultiplierSelect = false;
+        int selectedMultiplierIndex = 0;
+        while (!_onCreditMultiplierSelect)
+        {
+            selectedMultiplierIndex = _random.Next(_creditMultiplierList.Length);
+            Vector2Int setting = _creditMultiplierList[selectedMultiplierIndex];
+            ResetLights(setting.x);
+            GameUIManager.Instance.SetMultiplierText(setting.y);
+            yield return new WaitForSeconds(0.1f);
+        }
+        yield return new WaitForSeconds(1f);
+        GameUIManager.Instance.SetMultiplierText(0);
+        SelectCreditMultiplier(_creditMultiplierList[selectedMultiplierIndex]);
+        /*
+
         LightController[] lightControllers = lights.GetComponentsInChildren<LightController>();
         for (int i = 0; i < lightControllers.Length; ++i)
         {
@@ -230,35 +251,36 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(1);
         GameUIManager.Instance.SetMultiplierText(0);
         SelectCreditMultiplier(setting);
+*/
     }
-/*
-    private void ProcessDrag()
-    {
-        if (isMobile && Input.touchCount != 1)
+    /*
+        private void ProcessDrag()
         {
-            return false;
-        }
+            if (isMobile && Input.touchCount != 1)
+            {
+                return false;
+            }
 
-        Vector2 direction = Vector2.zero;
-        if (Input.GetMouseButtonDown(0) && !_eventSystem.IsPointerOverGameObject())
-        {
-            _mousePressed = true;
-            _firstMousePosition = Input.mousePosition;
-        }
-        else if (Input.GetMouseButtonUp(0))
-        {
-            _mousePressed = false;
-        }
-        else if (Input.GetMouseButton(0) && !_eventSystem.IsPointerOverGameObject())
-        {
-            Vector3 diff = Input.mousePosition - _firstMousePosition;
+            Vector2 direction = Vector2.zero;
+            if (Input.GetMouseButtonDown(0) && !_eventSystem.IsPointerOverGameObject())
+            {
+                _mousePressed = true;
+                _firstMousePosition = Input.mousePosition;
+            }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                _mousePressed = false;
+            }
+            else if (Input.GetMouseButton(0) && !_eventSystem.IsPointerOverGameObject())
+            {
+                Vector3 diff = Input.mousePosition - _firstMousePosition;
 
-            int my = (isMobile ? MobileDragInvertY : PCDragInvertY) ? -1 : 1;
-            float dragUnit = isMobile ? MobileDragUnit : PCDragUnit;
-            direction.y = my * diff.y / dragUnit;
+                int my = (isMobile ? MobileDragInvertY : PCDragInvertY) ? -1 : 1;
+                float dragUnit = isMobile ? MobileDragUnit : PCDragUnit;
+                direction.y = my * diff.y / dragUnit;
+            }
         }
-    }
-    */
+        */
 
     void Update()
     {
