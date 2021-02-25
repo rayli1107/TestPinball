@@ -72,6 +72,7 @@ public class AdsManager : MonoBehaviour, IUnityAdsListener
             if (showResult == ShowResult.Finished)
             {
                 Debug.Log("Ad Finished");
+
                 GlobalGameContext.ReloadCredits();
             }
             else if (showResult == ShowResult.Skipped)

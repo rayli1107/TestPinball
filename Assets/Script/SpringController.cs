@@ -119,7 +119,6 @@ public class SpringController : MonoBehaviour
         switch (_state)
         {
             case SpringState.kWaitingForPress:
-                //if (Input.GetKeyDown(KeyCode.Space))
                 if (isMobile && Input.touchCount != 1)
                 {
                     break;
@@ -128,6 +127,7 @@ public class SpringController : MonoBehaviour
                 if (Input.GetMouseButtonDown(0) &&
                     !_eventSystem.IsPointerOverGameObject())
                 {
+                    Debug.LogFormat("State Pressing {0}", Input.mousePosition);
                     _state = SpringState.kPressing;
                     _firstMousePosition = Input.mousePosition;
                 }
@@ -142,7 +142,7 @@ public class SpringController : MonoBehaviour
                     !_eventSystem.IsPointerOverGameObject())
                 {
                     Vector3 diff = Input.mousePosition - _firstMousePosition;
-
+                    Debug.LogFormat("State Dragging {0}", diff);
                     int my = (isMobile ? MobileDragInvertY : PCDragInvertY) ? -1 : 1;
                     float dragUnit = isMobile ? MobileDragUnit : PCDragUnit;
                     float y = my * diff.y / dragUnit;
@@ -152,6 +152,7 @@ public class SpringController : MonoBehaviour
                 }
                 else
                 {
+                    Debug.Log("State Released");
                     UnassignBall();
                     springBoard.isKinematic = false;
                     _state = SpringState.kReleased;

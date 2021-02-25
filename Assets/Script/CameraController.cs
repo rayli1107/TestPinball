@@ -71,51 +71,63 @@ public class CameraController : MonoBehaviour
     {
         _eventSystem = EventSystem.current;
 
+        Debug.LogFormat("Screen.safeArea {0}", Screen.safeArea);
         float x = Screen.safeArea.x / Screen.width;
         float width = Screen.safeArea.width / Screen.width;
         float y = Screen.safeArea.y / Screen.height;
         float height = Screen.safeArea.height / Screen.height;
         float newY = y + height * viewportY;
         height *= viewportHeight;
+        Debug.LogFormat("Camera Before {0}", _camera.rect);
         _camera.rect = new Rect(x, newY, width, height);
+        Debug.LogFormat("Camera After {0}", _camera.rect);
 
-        calculateGameAreaRect();
-        float cameraRatio = _cameraWidth / _cameraHeight;
-        float gameRatio = _gameAreaRect.width / _gameAreaRect.height;
+        if (walls != null)
+        {
+            calculateGameAreaRect();
+            float cameraRatio = _cameraWidth / _cameraHeight;
+            float gameRatio = _gameAreaRect.width / _gameAreaRect.height;
 
-        if (gameRatio > cameraRatio)
-        {
-            _maxCameraSize = (_gameAreaRect.width / cameraRatio) / 2;
+            if (gameRatio > cameraRatio)
+            {
+                _maxCameraSize = (_gameAreaRect.width / cameraRatio) / 2;
+            }
+            else
+            {
+                _maxCameraSize = _gameAreaRect.height / 2;
+            }
+            _camera.orthographicSize = _maxCameraSize;
         }
-        else
-        {
-            _maxCameraSize = _gameAreaRect.height / 2;
-        }
-        _camera.orthographicSize = _maxCameraSize;
     }
 
     private void Update()
     {
-        float speed = zoomSpeed * _maxCameraSize;
-        float size = _camera.orthographicSize + Time.deltaTime * speed * _zoomSpeedMultiple;
-        _camera.orthographicSize = Mathf.Clamp(size, _maxCameraSize * zoomFactor, _maxCameraSize);
+        if (target != null)
+        {
+            float speed = zoomSpeed * _maxCameraSize;
+            float size = _camera.orthographicSize + Time.deltaTime * speed * _zoomSpeedMultiple;
+            _camera.orthographicSize = Mathf.Clamp(size, _maxCameraSize * zoomFactor, _maxCameraSize);
+        }
     }
 
     private void LateUpdate()
     {
-        float cameraRatio = _cameraWidth / _cameraHeight;
-        float paddingHeight = _camera.orthographicSize;
-        float paddingWidth = paddingHeight * cameraRatio;
-        paddingHeight = Mathf.Min(paddingHeight, _gameAreaRect.height / 2);
-        paddingWidth = Mathf.Min(paddingWidth, _gameAreaRect.width / 2);
-        float minX = _gameAreaRect.x + paddingWidth;
-        float maxX = _gameAreaRect.x + _gameAreaRect.width - paddingWidth;
-        float minY = _gameAreaRect.y + paddingHeight;
-        float maxY = _gameAreaRect.y + _gameAreaRect.height - paddingHeight;
-        transform.position = new Vector3(
-            Mathf.Clamp(target.position.x, minX, maxX),
-            Mathf.Clamp(target.position.y, minY, maxY),
-            transform.position.z);
+        if (target != null)
+        {
+            float cameraRatio = _cameraWidth / _cameraHeight;
+            float paddingHeight = _camera.orthographicSize;
+            float paddingWidth = paddingHeight * cameraRatio;
+            paddingHeight = Mathf.Min(paddingHeight, _gameAreaRect.height / 2);
+            paddingWidth = Mathf.Min(paddingWidth, _gameAreaRect.width / 2);
+            float minX = _gameAreaRect.x + paddingWidth;
+            float maxX = _gameAreaRect.x + _gameAreaRect.width - paddingWidth;
+            float minY = _gameAreaRect.y + paddingHeight;
+            float maxY = _gameAreaRect.y + _gameAreaRect.height - paddingHeight;
+            transform.position = new Vector3(
+                Mathf.Clamp(target.position.x, minX, maxX),
+                Mathf.Clamp(target.position.y, minY, maxY),
+                transform.position.z);
+        }
     }
 
     public void ZoomIn()
