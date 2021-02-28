@@ -14,12 +14,6 @@ namespace UI {
         private HorizontalLayoutGroup _panelThemeList;
         [SerializeField]
         private float _speedMultiple = 4f;
-        [SerializeField]
-        private OptionsPanel _optionsPanel;
-        [SerializeField]
-        private TextMeshProUGUI _textCredits;
-        [SerializeField]
-        private TextMeshProUGUI _textKeys;
 #pragma warning restore 0649
 
         private float _speedX;
@@ -60,19 +54,6 @@ namespace UI {
         {
             _speedX = 0f;
             StartCoroutine(DelayedEnable());
-            GlobalGameContext.statUpdateAction += RefreshStats;
-            RefreshStats();
-        }
-
-        private void OnDisable()
-        {
-            GlobalGameContext.statUpdateAction -= RefreshStats;
-        }
-
-        private void RefreshStats()
-        {
-            _textCredits.text = GlobalGameContext.credits.ToString();
-            _textKeys.text = GlobalGameContext.keys.ToString();
         }
 
         public void OnNextButton()
@@ -112,10 +93,6 @@ namespace UI {
 
                 rect.anchoredPosition = new Vector2(x, 0);
             }
-        }
-        public void OnOptionsButton()
-        {
-            _optionsPanel.gameObject.SetActive(true);
         }
     }
 }

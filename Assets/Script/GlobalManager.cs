@@ -30,12 +30,22 @@ public static class GlobalGameContext
     }
 
     private static int _credits;
+    public static int maxCredits { get; private set; }
+    private static TimeSpan _creditReloadTimeDuration;
+    private static DateTime _lastCreditReloadTime;
+    public static DateTime creditReloadTime { get; private set; }
+
     public static int credits
     {
         get => _credits;
         set
         {
             _credits = value;
+            if (_credits < maxCredits)
+            {
+                _lastCreditReloadTime = DateTime.Now;
+                creditReloadTime = _lastCreditReloadTime + _creditReloadTimeDuration;
+            }
             statUpdateAction.Invoke();
         }
     }
@@ -75,15 +85,34 @@ public static class GlobalGameContext
             themes.Add(new ThemeContext(theme, theme.keysToUnlock > 0));
         }
 
+        _creditReloadTimeDuration = TimeSpan.FromSeconds(
+            globalManager.creditReloadTimeSeconds);
+        _creditReloadCount = globalManager.adCreditCount;
+        maxCredits = globalManager.maxCreditCount;
+
         keys = globalManager.initialKeyCount;
         credits = globalManager.initialCreditCount;
-        _creditReloadCount = globalManager.adCreditCount;
         themeIndex = 0;
     }
 
     public static void ReloadCredits()
     {
         credits = _creditReloadCount;
+    }
+
+    public static void UpdateCredits()
+    {
+        DateTime timeNow = DateTime.Now;
+        if (credits < maxCredits && timeNow >= creditReloadTime)
+        {
+//            Debug.Log("Credits Added");
+            int diffSecs = (timeNow - _lastCreditReloadTime).Seconds;
+            int creditAdded = diffSecs / _creditReloadTimeDuration.Seconds;
+            if (creditAdded > 0)
+            {
+                credits = Mathf.Min(credits + creditAdded, maxCredits);
+            }
+        }
     }
 }
 
@@ -98,15 +127,35 @@ public class GlobalManager : MonoBehaviour
     private int _adCreditCount = 10;
     [SerializeField]
     private int _initialKeyCount = 10;
+    [SerializeField]
+    private int _maxCreditCount = 10;
+    [SerializeField]
+    private int _creditReloadTimeSeconds = 10*60;
+    [SerializeField]
+    private bool _initialScene = true;
 #pragma warning restore 0649
 
     public ThemeProfile[] themes => _themes;
     public int initialCreditCount => _initialCreditCount;
+    public int maxCreditCount => _maxCreditCount;
     public int adCreditCount => _adCreditCount;
+    public int creditReloadTimeSeconds => _creditReloadTimeSeconds;
     public int initialKeyCount => _initialKeyCount;
+
 
     private void Awake()
     {
-        GlobalGameContext.Initialize(this);
+        if (_initialScene)
+        {
+            GlobalGameContext.Initialize(this);
+        }
+    }
+
+    private void Update()
+    {
+        if (GlobalGameContext.initialized)
+        {
+            GlobalGameContext.UpdateCredits();
+        }
     }
 }

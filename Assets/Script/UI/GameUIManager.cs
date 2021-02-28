@@ -12,15 +12,9 @@ namespace UI
         [SerializeField]
         private RectTransform _gameUIPanel;
         [SerializeField]
-        private TextMeshProUGUI _creditText;
-        [SerializeField]
-        private TextMeshProUGUI _keysText;
-        [SerializeField]
         private Button _playButton;
         [SerializeField]
         private Button _addCreditButton;
-        [SerializeField]
-        private OptionsPanel _optionsPanel;
         [SerializeField]
         private CreditMultiplierPanel _multiplierPanel;
         [SerializeField]
@@ -32,7 +26,6 @@ namespace UI
         [SerializeField]
         private Sprite _spriteKey;
 #pragma warning restore 0649
-        //    public int credit;
 
         public static GameUIManager Instance { get; private set; }
 
@@ -69,15 +62,8 @@ namespace UI
 
         private void RefreshStats()
         {
-            _creditText.text = GlobalGameContext.credits.ToString();
             _playButton.gameObject.SetActive(GlobalGameContext.credits > 0);
             _addCreditButton.gameObject.SetActive(GlobalGameContext.credits <= 0);
-            _keysText.text = GlobalGameContext.keys.ToString();
-        }
-
-        public void OnOptionsButton()
-        {
-            _optionsPanel.gameObject.SetActive(true);
         }
 
         public void ShowCreditMultiplierPanel()
