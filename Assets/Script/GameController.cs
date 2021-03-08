@@ -142,16 +142,15 @@ public class GameController : MonoBehaviour
                 Debug.LogFormat("Hit, Credit: {0}", GlobalGameContext.credits);
 
                 ball.gameObject.SetActive(false);
-                GameUIManager.Instance.ShowHitAnimation(
-                    true, OnHitAnimationFinish);
+                GameUIManager.Instance.ShowGoalAnimation(
+                    OnHitAnimationFinish, _multiplier);
                 break;
             case LightType.KEY:
                 GlobalGameContext.keys++;
                 Debug.LogFormat("Hit, Key: {0}", GlobalGameContext.keys);
 
                 ball.gameObject.SetActive(false);
-                GameUIManager.Instance.ShowHitAnimation(
-                    false, OnHitAnimationFinish);
+                GameUIManager.Instance.ShowKeyAnimation(OnHitAnimationFinish);
                 break;
             default:
                 Debug.LogFormat("Miss, Credit: {0}", GlobalGameContext.credits);

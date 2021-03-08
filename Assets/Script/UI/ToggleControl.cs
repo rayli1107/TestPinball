@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Assets.Script.UI
+namespace UI
 {
     class ToggleControl : MonoBehaviour
     {

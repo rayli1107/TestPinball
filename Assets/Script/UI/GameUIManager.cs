@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace UI
 {
     public class GameUIManager : MonoBehaviour
@@ -19,10 +20,16 @@ namespace UI
         private CreditMultiplierPanel _multiplierPanel;
         [SerializeField]
         private TextMeshProUGUI _textMultiplier;
+        /*
+                [SerializeField]
+                private Image _imageHitAnimation;
+                [SerializeField]
+                private float _hitAnimationDuration = 2f;
+                */
         [SerializeField]
-        private Image _imageHitAnimation;
+        private ImageFadeAnimation _prefabStandardFadeAnimation;
         [SerializeField]
-        private float _hitAnimationDuration = 2f;
+        private ImageFadeAnimation _prefabHeartFadeAnimation;
         [SerializeField]
         private Sprite _spriteKey;
 #pragma warning restore 0649
@@ -97,6 +104,41 @@ namespace UI
             _gameUIPanel.gameObject.SetActive(enable);
         }
 
+        public void ShowKeyAnimation(Action callback)
+        {
+            ImageFadeAnimation animator = Instantiate(
+                _prefabStandardFadeAnimation, transform);
+            animator.callback = callback;
+            animator.GetComponent<Image>().sprite = _spriteKey;
+            animator.gameObject.SetActive(true);
+        }
+
+        public void ShowGoalAnimation(Action callback, int credits)
+        {
+            ImageFadeAnimation animator = Instantiate(
+                _prefabStandardFadeAnimation, transform);
+            animator.callback = () => StartCoroutine(
+                ShowCreditGains(callback, credits));
+            animator.GetComponent<Image>().sprite = GlobalGameContext.currentTheme.goal;
+            animator.gameObject.SetActive(true);
+        }
+
+        private IEnumerator ShowCreditGains(Action callback, int credits)
+        {
+            for (int i = 0; i < credits; ++i)
+            {
+                ImageFadeAnimation animator = Instantiate(
+                    _prefabHeartFadeAnimation, transform);
+                if (i == credits - 1)
+                {
+                    animator.callback = callback;
+                }
+                animator.gameObject.SetActive(true);
+                yield return new WaitForSeconds(0.2f);
+            }
+        }
+
+/*
         public void ShowHitAnimation(bool goal, Action callback)
         {
             ThemeProfile theme = GlobalGameContext.currentTheme;
@@ -127,5 +169,6 @@ namespace UI
             callback?.Invoke();
             _imageHitAnimation.gameObject.SetActive(false);
         }
+        */
     }
 }
