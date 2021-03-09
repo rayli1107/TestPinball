@@ -9,8 +9,6 @@ public class CameraController : MonoBehaviour
     public SpringController springController;
     public float zoomFactor = 0.4f;
     public float zoomSpeed = 0.6f;
-    public float viewportY = 0.15f;
-    public float viewportHeight = 0.75f;
 
     public Transform walls;
     public float padding = 0.1f;
@@ -20,8 +18,8 @@ public class CameraController : MonoBehaviour
     private Camera _camera;
     private float _maxCameraSize;
     private Rect _gameAreaRect;
-
     private int _zoomSpeedMultiple = 1;
+    private bool _initialized;
 
     private float _cameraWidth { 
         get
@@ -67,20 +65,13 @@ public class CameraController : MonoBehaviour
         _gameAreaRect = new Rect(minX - padding, minY - padding, width, height);
     }
 
-    void Start()
+    private void UpdateCameraSize()
     {
-        _eventSystem = EventSystem.current;
-
-        Debug.LogFormat("Screen.safeArea {0}", Screen.safeArea);
         float x = Screen.safeArea.x / Screen.width;
         float width = Screen.safeArea.width / Screen.width;
         float y = Screen.safeArea.y / Screen.height;
         float height = Screen.safeArea.height / Screen.height;
-        float newY = y + height * viewportY;
-        height *= viewportHeight;
-        Debug.LogFormat("Camera Before {0}", _camera.rect);
-        _camera.rect = new Rect(x, newY, width, height);
-        Debug.LogFormat("Camera After {0}", _camera.rect);
+        _camera.rect = new Rect(x, y, width, height);
 
         if (walls != null)
         {
@@ -100,9 +91,40 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        _eventSystem = EventSystem.current;
+    }
+
+    private void OnEnable()
+    {
+        _initialized = false;
+        StartCoroutine(DelayedOnEnable());
+    }
+
+    private IEnumerator DelayedOnEnable()
+    {
+        while (ScreenSafeAreaController.Instance == null)
+        {
+            yield return null;
+        }
+
+        ScreenSafeAreaController.Instance.updateCallbacks += UpdateCameraSize;
+        UpdateCameraSize();
+        _initialized = true;
+    }
+
+    private void OnDisable()
+    {
+        if (ScreenSafeAreaController.Instance != null)
+        {
+            ScreenSafeAreaController.Instance.updateCallbacks -= UpdateCameraSize;
+        }
+    }
+
     private void Update()
     {
-        if (target != null)
+        if (_initialized && target != null)
         {
             float speed = zoomSpeed * _maxCameraSize;
             float size = _camera.orthographicSize + Time.deltaTime * speed * _zoomSpeedMultiple;
@@ -112,7 +134,7 @@ public class CameraController : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (target != null)
+        if (_initialized && target != null)
         {
             float cameraRatio = _cameraWidth / _cameraHeight;
             float paddingHeight = _camera.orthographicSize;

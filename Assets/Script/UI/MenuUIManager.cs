@@ -52,6 +52,11 @@ namespace UI {
 
         private void OnEnable()
         {
+            float x = Screen.safeArea.x / Screen.width;
+            float width = Screen.safeArea.width / Screen.width;
+            float y = Screen.safeArea.y / Screen.height;
+            float height = Screen.safeArea.height / Screen.height;
+
             _speedX = 0f;
             StartCoroutine(DelayedEnable());
         }

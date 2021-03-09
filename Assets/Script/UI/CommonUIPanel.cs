@@ -15,6 +15,10 @@ namespace UI
         private TextMeshProUGUI _keysText;
         [SerializeField]
         private OptionsPanel _optionsPanel;
+        [SerializeField]
+        private bool _enableDebugLoggingPanel = false;
+        [SerializeField]
+        private RectTransform _debugLoggingPanel;
 #pragma warning restore 0649
 
         private DateTime _lastUpdateTime;
@@ -23,11 +27,37 @@ namespace UI
         {
             GlobalGameContext.statUpdateAction += RefreshStats;
             RefreshStats();
+
+            DebugUtility.logUpdateAction += ShowDebugLog;
+            ShowDebugLog();
         }
 
         private void OnDisable()
         {
             GlobalGameContext.statUpdateAction -= RefreshStats;
+            DebugUtility.logUpdateAction -= ShowDebugLog;
+        }
+
+        private void ShowDebugLog()
+        {
+            if (_debugLoggingPanel != null)
+            {
+                TextMeshProUGUI text =
+                    _debugLoggingPanel.GetComponentInChildren<TextMeshProUGUI>();
+                if (text != null)
+                {
+                    string message = DebugUtility.currentMessage;
+                    if (_enableDebugLoggingPanel && message != null && message.Length > 0)
+                    {
+                        _debugLoggingPanel.gameObject.SetActive(true);
+                        text.text = message;
+                    }
+                    else
+                    {
+                        _debugLoggingPanel.gameObject.SetActive(false);
+                    }
+                }
+            }
         }
 
         private void RefreshStats()
