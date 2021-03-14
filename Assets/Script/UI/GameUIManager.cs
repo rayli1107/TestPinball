@@ -20,16 +20,12 @@ namespace UI
         private CreditMultiplierPanel _multiplierPanel;
         [SerializeField]
         private TextMeshProUGUI _textMultiplier;
-        /*
-                [SerializeField]
-                private Image _imageHitAnimation;
-                [SerializeField]
-                private float _hitAnimationDuration = 2f;
-                */
         [SerializeField]
         private ImageFadeAnimation _prefabStandardFadeAnimation;
         [SerializeField]
         private ImageFadeAnimation _prefabHeartFadeAnimation;
+        [SerializeField]
+        private RectTransform _heartFadeTarget;
         [SerializeField]
         private Sprite _spriteKey;
 #pragma warning restore 0649
@@ -113,17 +109,23 @@ namespace UI
             animator.gameObject.SetActive(true);
         }
 
-        public void ShowGoalAnimation(Action callback, int credits)
+        public void ShowGoalAnimation(
+            Action creditGainCallback,
+            Action animationDoneCallback,
+            int credits)
         {
             ImageFadeAnimation animator = Instantiate(
                 _prefabStandardFadeAnimation, transform);
             animator.callback = () => StartCoroutine(
-                ShowCreditGains(callback, credits));
-            animator.GetComponent<Image>().sprite = GlobalGameContext.currentTheme.goal;
+                ShowCreditGains(creditGainCallback, animationDoneCallback, credits));
+            animator.GetComponent<Image>().sprite = GlobalGameContext.currentTheme.completedGoal;
             animator.gameObject.SetActive(true);
         }
 
-        private IEnumerator ShowCreditGains(Action callback, int credits)
+        private IEnumerator ShowCreditGains(
+            Action creditGainCallback,
+            Action animationDoneCallback,
+            int credits)
         {
             for (int i = 0; i < credits; ++i)
             {
@@ -131,8 +133,15 @@ namespace UI
                     _prefabHeartFadeAnimation, transform);
                 if (i == credits - 1)
                 {
+                    Action callback = creditGainCallback;
+                    callback += animationDoneCallback;
                     animator.callback = callback;
                 }
+                else
+                {
+                    animator.callback = creditGainCallback;
+                }
+                animator.move = _heartFadeTarget.transform.position - animator.transform.position;
                 animator.gameObject.SetActive(true);
                 yield return new WaitForSeconds(0.2f);
             }

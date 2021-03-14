@@ -138,12 +138,11 @@ public class GameController : MonoBehaviour
         switch (lightType)
         {
             case LightType.GOAL:
-                GlobalGameContext.credits += _multiplier;
                 Debug.LogFormat("Hit, Credit: {0}", GlobalGameContext.credits);
 
                 ball.gameObject.SetActive(false);
                 GameUIManager.Instance.ShowGoalAnimation(
-                    OnHitAnimationFinish, _multiplier);
+                    () => ++GlobalGameContext.credits, OnHitAnimationFinish, _multiplier);
                 break;
             case LightType.KEY:
                 GlobalGameContext.keys++;

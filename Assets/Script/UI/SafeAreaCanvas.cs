@@ -8,6 +8,21 @@ namespace UI
 {
     public class SafeAreaCanvas : MonoBehaviour
     {
+#pragma warning disable 0649
+        [SerializeField]
+        private bool  _useThemeBackground;
+#pragma warning restore 0649
+
+        private void Awake()
+        {
+            if (_useThemeBackground)
+            {
+                Image image = GetComponent<Image>();
+                image.sprite = GlobalGameContext.currentTheme.background;
+                image.enabled = true;
+            }
+        }
+
         private void UpdateCanvasSize()
         {
             float x = Screen.safeArea.x / Screen.width;

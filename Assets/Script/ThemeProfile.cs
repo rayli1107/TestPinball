@@ -6,6 +6,7 @@ public class ThemeProfile : ScriptableObject
     public string themeName;
     public Sprite background;
     public Sprite goal;
+    public Sprite completedGoal;
     public Sprite ball;
     public Color backgroundColor;
     public Color wallColor;
