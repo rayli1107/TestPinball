@@ -12,6 +12,12 @@ public class ScreenSafeAreaController : MonoBehaviour
     {
         Instance = this;
         _prevSafeArea = Rect.zero;
+        Debug.LogFormat("ScreenSafeAreaController.Awake");
+        Debug.LogFormat("Display.main {0} {1}", Display.main.systemWidth, Display.main.systemHeight);
+        foreach (Resolution resolution in Screen.resolutions)
+        {
+            Debug.LogFormat("Resolution: {0}", resolution.ToString());
+        }
     }
 
     private void Update()

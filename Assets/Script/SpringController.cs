@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class SpringController : MonoBehaviour
@@ -17,6 +18,7 @@ public class SpringController : MonoBehaviour
     public float tension = -10;
     public float maxDistance = -2;
     public float delta = -1;
+    public float minBoardDragThreshold = 0.3f;
 
     public Rigidbody2D springBoard;
     public Rigidbody2D ball;
@@ -148,33 +150,28 @@ public class SpringController : MonoBehaviour
                     springBoard.transform.localPosition = new Vector3(0, y, 0);
                     SetBallPosition();
                 }
+                else if (springBoard.transform.localPosition.y >= -1 * minBoardDragThreshold)
+                {
+                    _state = SpringState.kWaitingForBall;
+                    ResetSpringBoard();
+                    OnBallCollision();
+                }
                 else
                 {
                     UnassignBall();
                     springBoard.isKinematic = false;
                     _state = SpringState.kReleased;
                 }
-                /*
-                if (Input.GetKeyUp(KeyCode.Space))
-                {
-                    UnassignBall();
-                    springBoard.isKinematic = false;
-                    _state = SpringState.kReleased;
-                }
-                else
-                {
-                    float y = springBoard.transform.localPosition.y;
-                    y += delta * Time.deltaTime;
-                    y = Mathf.Max(y, maxDistance);
-                    springBoard.transform.localPosition = new Vector3(0, y, 0);
-                    SetBallPosition();
-                }*/
                 break;
             case SpringState.kReleased:
                 AddTensionToBoard();
                 if (springBoard.velocity.y > 0)
                 {
                     _state = SpringState.kRising;
+                }
+                else
+                {
+                    _state = SpringState.kFalling;
                 }
                 break;
             case SpringState.kRising:
@@ -198,35 +195,6 @@ public class SpringController : MonoBehaviour
             default:
                 break;
         }
-
-        /*
-        if (_rigidBody.isKinematic)
-        {
-            if (Input.GetKey(KeyCode.Space))
-            {
-                float y = transform.localPosition.y + delta * Time.deltaTime;
-                y = Mathf.Max(y, maxDistance);
-                transform.localPosition = new Vector3(0, y, 0);
-            }
-            else if (Input.GetKeyUp(KeyCode.Space))
-            {
-                _rigidBody.isKinematic = false;
-            }
-        }
-
-        if (!_rigidBody.isKinematic)
-        {
-            Vector2 a = new Vector2(0, transform.localPosition.y * tension);
-            _rigidBody.AddForce(a * _rigidBody.mass, ForceMode2D.Impulse);
-
-            if (_rigidBody.velocity.y < 0 &&
-                transform.localPosition.magnitude < 0.1)
-            {
-                _rigidBody.isKinematic = true;
-                transform.localPosition = Vector3.zero;
-            }
-        }
-        */
     }
 
     private void AddTensionToBoard()

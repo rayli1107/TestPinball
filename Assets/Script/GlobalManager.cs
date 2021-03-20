@@ -25,7 +25,7 @@ public static class GlobalGameContext
         set
         {
             _keys = value;
-            statUpdateAction.Invoke();
+            statUpdateAction?.Invoke();
         }
     }
 
@@ -46,7 +46,7 @@ public static class GlobalGameContext
                 _lastCreditReloadTime = DateTime.Now;
                 creditReloadTime = _lastCreditReloadTime + _creditReloadTimeDuration;
             }
-            statUpdateAction.Invoke();
+            statUpdateAction?.Invoke();
         }
     }
 

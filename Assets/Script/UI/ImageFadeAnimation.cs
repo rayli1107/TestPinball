@@ -34,7 +34,7 @@ namespace UI
             if (timeDelta >= duration)
             {
                 callback?.Invoke();
-                Destroy(this);
+                Destroy(gameObject);
                 return;
             }
 
