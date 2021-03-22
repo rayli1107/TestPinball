@@ -7,11 +7,20 @@ using UnityEngine.UI;
 
 namespace UI
 {
+    public enum GameUIMode
+    {
+        kWaitForPlay,
+        kCancelMultiplierSelect,
+        kNone
+    }
+
     public class GameUIManager : MonoBehaviour
     {
 #pragma warning disable 0649
         [SerializeField]
-        private RectTransform _gameUIPanel;
+        private RectTransform _waitForPlayPanel;
+        [SerializeField]
+        private RectTransform _cancelMultiplierSelectPanel;
         [SerializeField]
         private Button _playButton;
         [SerializeField]
@@ -37,14 +46,29 @@ namespace UI
             Instance = this;
         }
 
+        private IEnumerator DelayedOnEnable()
+        {
+            while (GameController.Instance == null)
+            {
+                yield return null; 
+            }
+            GameController.Instance.stateUpdateActions += OnGameStateUpdate;
+            OnGameStateUpdate();
+        }
+
         private void OnEnable()
         {
             GlobalGameContext.statUpdateAction += RefreshStats;
+            StartCoroutine(DelayedOnEnable());
             RefreshStats();
         }
 
         private void OnDisable()
         {
+            if (GameController.Instance != null)
+            {
+                GameController.Instance.stateUpdateActions -= OnGameStateUpdate;
+            }
             GlobalGameContext.statUpdateAction -= RefreshStats;
         }
 
@@ -61,6 +85,11 @@ namespace UI
         public void OnButtonQuit()
         {
             GameController.Instance.Quit();
+        }
+
+        public void OnButtonCancel()
+        {
+            GameController.Instance.CancelCreditMultiplierSelect();
         }
 
         private void RefreshStats()
@@ -95,9 +124,12 @@ namespace UI
             _textMultiplier.text = string.Join("\n", text);
         }
 
-        public void EnableGameUIPanel(bool enable)
+        private void EnableGameUIPanel(GameUIMode mode)
         {
-            _gameUIPanel.gameObject.SetActive(enable);
+            _waitForPlayPanel.gameObject.SetActive(
+                mode == GameUIMode.kWaitForPlay);
+            _cancelMultiplierSelectPanel.gameObject.SetActive(
+                mode == GameUIMode.kCancelMultiplierSelect);
         }
 
         public void ShowKeyAnimation(Action callback)
@@ -144,6 +176,22 @@ namespace UI
                 animator.move = _heartFadeTarget.transform.position - animator.transform.position;
                 animator.gameObject.SetActive(true);
                 yield return new WaitForSeconds(0.2f);
+            }
+        }
+
+        private void OnGameStateUpdate()
+        {
+            switch (GameController.Instance.state)
+            {
+                case GameState.kWaitForPlay:
+                    EnableGameUIPanel(GameUIMode.kWaitForPlay);
+                    break;
+                case GameState.kSelectMultiplier:
+                    EnableGameUIPanel(GameUIMode.kCancelMultiplierSelect);
+                    break;
+                default:
+                    EnableGameUIPanel(GameUIMode.kNone);
+                    break;
             }
         }
 

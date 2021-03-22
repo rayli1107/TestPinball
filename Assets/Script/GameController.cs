@@ -3,22 +3,31 @@ using UnityEngine.SceneManagement;
 using UI;
 using System.Collections.Generic;
 using System.Collections;
+using System;
+using UnityEngine.EventSystems;
+
+public enum GameState
+{
+    kInit,
+    kWaitForPlay,
+    kSelectMultiplier,
+    kWaitForGameStart,
+    kGameInit,
+    kGameStart,
+    kScoring
+}
 
 public class GameController : MonoBehaviour
 {
-    public enum GameState
-    {
-        kCreditCheck,
-        kSelectMultiplier,
-        kGameStart,
-        kScoring
-    }
-
 #pragma warning disable 0649
     [SerializeField]
     private Vector2Int[] _creditMultiplierList;
     [SerializeField]
     private GameObject _walls;
+    [SerializeField]
+    private bool _autoStartGame = true;
+    [SerializeField]
+    private TimeSpan _updateLightInterval = TimeSpan.FromMilliseconds(100);
 #pragma warning restore 0649
     public Vector2Int[] creditMultiplierList => _creditMultiplierList;
 
@@ -41,10 +50,38 @@ public class GameController : MonoBehaviour
     public float lightEnableChance = 0.3f;
 
     private int _multiplier;
+
+    public Action stateUpdateActions;
     private GameState _state;
+    public GameState state
+    {
+        get => _state;
+        private set
+        {
+            if (_state != GameState.kWaitForPlay &&
+                value == GameState.kWaitForPlay)
+            {
+                foreach (LightController light in lights.GetComponentsInChildren<LightController>())
+                {
+                    light.SetState(LightType.NONE);
+                }
+            }
+            else if (_state != GameState.kSelectMultiplier &&
+                     value == GameState.kSelectMultiplier)
+            {
+                UpdateLightSetting(DateTime.Now);
+            }
+
+            _state = value;
+            stateUpdateActions?.Invoke();
+        }
+    }
+
     private System.Random _random;
-    private bool _first;
-    private bool _onCreditMultiplierSelect;
+
+    private int _selectedCreditMultiplierIndex;
+    private DateTime _nextLightUpdateTime;
+    private EventSystem _eventSystem;
 
     public void OnEnable()
     {
@@ -54,8 +91,7 @@ public class GameController : MonoBehaviour
             return;
         }
 
-        _state = GameState.kCreditCheck;
-        _first = true;
+        state = GameState.kInit;
 
         ThemeProfile theme = GlobalGameContext.currentTheme;
         background.sprite = theme.background;
@@ -71,6 +107,7 @@ public class GameController : MonoBehaviour
     private void Awake()
     {
         _random = new System.Random(System.Guid.NewGuid().GetHashCode());
+        _eventSystem = EventSystem.current;
         if (Instance == null)
         {
             Instance = this;
@@ -155,19 +192,18 @@ public class GameController : MonoBehaviour
                 Debug.LogFormat("Miss, Credit: {0}", GlobalGameContext.credits);
                 break;
         }
-        _state = GameState.kScoring;
+        state = GameState.kScoring;
         ball.SetBouncy(false);
     }
 
     public void OnBallReturn()
     {
-        if (_state == GameState.kScoring)
+        if (state == GameState.kScoring)
         {
-            _state = GameState.kCreditCheck;
+            state = GameState.kWaitForPlay;
             CameraController.Instance.ZoomOut();
-            GameUIManager.Instance.EnableGameUIPanel(true);
         }
-        else if (_state == GameState.kGameStart)
+        else if (state == GameState.kGameStart)
         {
             springController.AllowPlay();
         }
@@ -175,7 +211,7 @@ public class GameController : MonoBehaviour
 
     public void StartVideoAd()
     {
-        if (_state == GameState.kCreditCheck && GlobalGameContext.credits == 0)
+        if (state == GameState.kWaitForPlay && GlobalGameContext.credits == 0)
         {
             AdsManager.Instance.DisplayVideoAd();
         }
@@ -183,22 +219,28 @@ public class GameController : MonoBehaviour
 
     public void StartPlay()
     {
-        if (_state == GameState.kCreditCheck && GlobalGameContext.credits > 0)
+        if (state == GameState.kWaitForPlay && GlobalGameContext.credits > 0)
         {
-            --GlobalGameContext.credits;
-            _state = GameState.kSelectMultiplier;
-            StartCoroutine(AnimateLights());
-//            GameUIManager.Instance.ShowCreditMultiplierPanel();
+//            --GlobalGameContext.credits;
+            state = GameState.kSelectMultiplier;
+//            StartCoroutine(AnimateLights());
+        }
+    }
+
+    public void CancelCreditMultiplierSelect()
+    {
+        if (state == GameState.kSelectMultiplier)
+        {
+            GameUIManager.Instance.SetMultiplierText(0);
+            state = GameState.kWaitForPlay;
         }
     }
 
     public void SelectCreditMultiplier(Vector2Int setting)
     {
-        GameUIManager.Instance.EnableGameUIPanel(false);
         _multiplier = setting.y;
-        _state = GameState.kGameStart;
+        state = GameState.kGameStart;
         ball.SetBouncy(true);
-//        ResetLights(setting.x);
         springController.AllowPlay();
         if (GlobalConfig.autoZoom)
         {
@@ -208,49 +250,31 @@ public class GameController : MonoBehaviour
 
     public void SelectCreditMultiplier()
     {
-        _onCreditMultiplierSelect = true;
+        if (state == GameState.kSelectMultiplier)
+        {
+            --GlobalGameContext.credits;
+            state = GameState.kWaitForGameStart;
+            StartCoroutine(DelayedRun(1f, () => state = GameState.kGameInit));
+        }
     }
-
-    private IEnumerator AnimateLights()
-    {
-        _onCreditMultiplierSelect = false;
-        int selectedMultiplierIndex = 0;
-        while (!_onCreditMultiplierSelect)
+    /*
+        private IEnumerator AnimateLights()
         {
-            selectedMultiplierIndex = _random.Next(_creditMultiplierList.Length);
-            Vector2Int setting = _creditMultiplierList[selectedMultiplierIndex];
-            ResetLights(setting.x);
-            GameUIManager.Instance.SetMultiplierText(setting.y);
-            yield return new WaitForSeconds(0.1f);
+            _onCreditMultiplierSelect = false;
+            int selectedMultiplierIndex = 0;
+            while (!_onCreditMultiplierSelect)
+            {
+                selectedMultiplierIndex = _random.Next(_creditMultiplierList.Length);
+                Vector2Int setting = _creditMultiplierList[selectedMultiplierIndex];
+                ResetLights(setting.x);
+                GameUIManager.Instance.SetMultiplierText(setting.y);
+                yield return new WaitForSeconds(0.1f);
+            }
+            yield return new WaitForSeconds(1f);
+            GameUIManager.Instance.SetMultiplierText(0);
+            SelectCreditMultiplier(_creditMultiplierList[selectedMultiplierIndex]);
         }
-        yield return new WaitForSeconds(1f);
-        GameUIManager.Instance.SetMultiplierText(0);
-        SelectCreditMultiplier(_creditMultiplierList[selectedMultiplierIndex]);
-        /*
-
-        LightController[] lightControllers = lights.GetComponentsInChildren<LightController>();
-        for (int i = 0; i < lightControllers.Length; ++i)
-        {
-            lightControllers[i].SetState(LightType.NONE);
-        }
-
-        for (int i = 0; i < 3 * lightControllers.Length; ++i)
-        {
-            int prev = i % lightControllers.Length;
-            int cur = (i + 1) % lightControllers.Length;
-            lightControllers[prev].SetState(LightType.NONE);
-            lightControllers[cur].SetState(LightType.GOAL);
-            yield return new WaitForSeconds(0.3f / lightControllers.Length);
-        }
-
-        int index = _random.Next(_creditMultiplierList.Length);
-        Vector2Int setting = _creditMultiplierList[index];
-        GameUIManager.Instance.SetMultiplierText(setting.y);
-        yield return new WaitForSeconds(1);
-        GameUIManager.Instance.SetMultiplierText(0);
-        SelectCreditMultiplier(setting);
-*/
-    }
+        */
     /*
         private void ProcessDrag()
         {
@@ -280,12 +304,54 @@ public class GameController : MonoBehaviour
         }
         */
 
+    private IEnumerator DelayedRun(float time, Action action)
+    {
+        yield return new WaitForSeconds(time);
+        action?.Invoke();
+    }
+
+    private void UpdateLightSetting(DateTime timeNow)
+    {
+        _selectedCreditMultiplierIndex = _random.Next(_creditMultiplierList.Length);
+        Vector2Int setting = _creditMultiplierList[_selectedCreditMultiplierIndex];
+        ResetLights(setting.x);
+        GameUIManager.Instance.SetMultiplierText(setting.y);
+        _nextLightUpdateTime = timeNow + _updateLightInterval;
+    }
+
     void Update()
     {
-        if (_first)
+        switch (state)
         {
-            _first = false;
-            GameUIManager.Instance.EnableGameUIPanel(true);
+            case GameState.kInit:
+                _nextLightUpdateTime = DateTime.MinValue;
+                if (_autoStartGame && GlobalGameContext.credits > 0)
+                {
+                    state = GameState.kSelectMultiplier;
+                }
+                else
+                {
+                    state = GameState.kWaitForPlay;
+                }
+                break;
+
+            case GameState.kSelectMultiplier:
+                DateTime timeNow = DateTime.Now;
+                if (timeNow > _nextLightUpdateTime)
+                {
+                    UpdateLightSetting(timeNow);
+                }
+                break;
+
+            case GameState.kGameInit:
+                GameUIManager.Instance.SetMultiplierText(0);
+                SelectCreditMultiplier(
+                    _creditMultiplierList[_selectedCreditMultiplierIndex]);
+                state = GameState.kGameStart;
+                break;
+
+            default:
+                break;
         }
     }
 
