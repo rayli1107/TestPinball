@@ -9,94 +9,38 @@ namespace UI {
     {
 #pragma warning disable 0649
         [SerializeField]
-        private ThemePanel _prefabThemePanel;
+        private Button _buttonPlay;
         [SerializeField]
-        private HorizontalLayoutGroup _panelThemeList;
+        private Button _buttonUnlock;
         [SerializeField]
-        private float _speedMultiple = 4f;
+        private ThemeSelectionManager _themeSelectionManager;
 #pragma warning restore 0649
-
-        private float _speedX;
-
-        private float deltaX
-        {
-            get
-            {
-                float ret = _prefabThemePanel.GetComponent<RectTransform>().rect.width;
-                ret += _panelThemeList.spacing;
-                return ret;
-            }
-        }
-
-        private float getX(int i)
-        {
-            float ret = _prefabThemePanel.GetComponent<RectTransform>().rect.width / 2;
-            ret += i * deltaX;
-            return -1 * ret;
-        }
-
-        private IEnumerator DelayedEnable()
-        {
-            while (!GlobalGameContext.initialized)
-            {
-                yield return null;
-            }
-            for (int i = 0; i < GlobalGameContext.themes.Count; ++i)
-            {
-                ThemePanel themePanel = Instantiate(
-                    _prefabThemePanel, _panelThemeList.transform);
-                themePanel.themeIndex = i;
-                themePanel.gameObject.SetActive(true);
-            }
-        }
-
-        private void OnEnable()
-        {
-            float x = Screen.safeArea.x / Screen.width;
-            float width = Screen.safeArea.width / Screen.width;
-            float y = Screen.safeArea.y / Screen.height;
-            float height = Screen.safeArea.height / Screen.height;
-
-            _speedX = 0f;
-            StartCoroutine(DelayedEnable());
-        }
-
-        public void OnNextButton()
-        {
-            GlobalGameContext.themeIndex++;
-            _speedX = deltaX * (GlobalGameContext.themeIndex == 0 ? 1 : -1);
-        }
-
-        public void OnPrevButton()
-        {
-            GlobalGameContext.themeIndex--;
-            int count = GlobalGameContext.themes.Count;
-            _speedX = deltaX * ((GlobalGameContext.themeIndex == count - 1) ? -1 : 1);
-        }
 
         public void OnPlayButton()
         {
             SceneManager.LoadScene("GameScene");
         }
 
-        private void Update()
+        public void OnUnlockButton()
         {
-            RectTransform rect = _panelThemeList.GetComponent<RectTransform>();
-            float x = rect.anchoredPosition.x;
-            float targetX = getX(GlobalGameContext.themeIndex);
-            if (x != targetX)
-            {
-                float speed = _speedMultiple * _speedX * Time.deltaTime;
-                if (_speedX > 0)
-                {
-                    x = Mathf.Min(x + speed, targetX);
-                }
-                else
-                {
-                    x = Mathf.Max(x + speed, targetX);
-                }
+            GlobalGameContext.TryUnlock(GlobalGameContext.themeIndex);
+            _themeSelectionManager.Refresh();
+            EnableAction(true);
+        }
 
-                rect.anchoredPosition = new Vector2(x, 0);
+        public void EnableAction(bool enable)
+        {
+            if (enable)
+            {
+                ThemeState state = GlobalGameContext.GetThemeState(
+                    GlobalGameContext.themeIndex);
+                _buttonPlay.gameObject.SetActive(state == ThemeState.kCanPlay);
+                _buttonUnlock.gameObject.SetActive(state == ThemeState.kCanUnlock);
+            }
+            else
+            {
+                _buttonPlay.gameObject.SetActive(false);
+                _buttonUnlock.gameObject.SetActive(false);
             }
         }
     }

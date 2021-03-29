@@ -39,13 +39,6 @@ public class SpringController : MonoBehaviour
     private EventSystem _eventSystem;
 
     //    private Rigidbody2D _rigidBody;
-    private bool isMobile
-    {
-        get
-        {
-            return Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer;
-        }
-    }
 
     private void Awake()
     {
@@ -118,6 +111,7 @@ public class SpringController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        bool isMobile = GlobalGameContext.isMobile;
         switch (_state)
         {
             case SpringState.kWaitingForPress:

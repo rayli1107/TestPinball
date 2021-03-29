@@ -14,8 +14,26 @@ public class ThemeContext
     }
 }
 
+public enum ThemeState
+{
+    kCanPlay,
+    kCanUnlock,
+    kCannotUnlock
+}
+
 public static class GlobalGameContext
 {
+    public static bool isMobile
+    {
+        get
+        {
+            return (
+                Application.platform == RuntimePlatform.Android ||
+                Application.platform == RuntimePlatform.IPhonePlayer);
+        }
+    }
+
+
     public static List<ThemeContext> themes {get; private set;}
     public static bool initialized { get; private set; } = false;
 
@@ -69,6 +87,7 @@ public static class GlobalGameContext
     }
 
     public static ThemeProfile currentTheme => themes[themeIndex].theme;
+    public static bool currentThemeLocked => themes[themeIndex].locked;
     public static Action statUpdateAction;
 
     public static void Initialize(GlobalManager globalManager)
@@ -113,6 +132,36 @@ public static class GlobalGameContext
                 credits = Mathf.Min(credits + creditAdded, maxCredits);
             }
         }
+    }
+
+    public static ThemeState GetThemeState(int index)
+    {
+        if (themes[index].locked)
+        {
+            if (keys >= currentTheme.keysToUnlock)
+            {
+                return ThemeState.kCanUnlock;
+            }
+            else
+            {
+                return ThemeState.kCannotUnlock;
+            }
+        }
+        return ThemeState.kCanPlay;
+    }
+
+    public static ThemeState CurrentThemeState => GetThemeState(themeIndex);
+
+    public static bool TryUnlock(int index)
+    {
+        if (themes[index].locked &&
+            keys >= currentTheme.keysToUnlock)
+        {
+            keys -= currentTheme.keysToUnlock;
+            themes[index].locked = false;
+            return true;
+        }
+        return false;
     }
 }
 

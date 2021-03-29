@@ -36,7 +36,7 @@ namespace UI
         {
             Refresh();
         }
-
+/*
         public void OnButtonUnlock()
         {
             ThemeProfile theme = GlobalGameContext.themes[themeIndex].theme;
@@ -48,5 +48,6 @@ namespace UI
                 Refresh();
             }
         }
+        */
     }
 }
