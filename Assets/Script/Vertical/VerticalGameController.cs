@@ -123,6 +123,8 @@ namespace Vertical
                 _holes[i].SetState(i == index);
                 _holes[i].callback = Reset;
             }
+
+            _barObject.GetComponent<BarController>().Reset();
         }
     }
 }
